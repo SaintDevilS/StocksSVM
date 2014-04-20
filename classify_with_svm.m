@@ -53,10 +53,10 @@ function svmstruct = train_svm(csvMatrix)
         end
     end
     
-    options = statset('MaxIter', 50000);
- %   svmstruct = svmtrain(training,classification, 'kernel_function', 'polynomial', 'polyorder', 30, 'options', options);
+    options = statset('MaxIter', 150000);
+    svmstruct = svmtrain(training(1:2:length(training),:),classification(1:2:length(classification)), 'kernel_function', 'polynomial', 'polyorder', 4, 'options', options);
 
-    svmstruct = svmtrain(training(1:5:length(training),:),classification(1:5:length(classification)), 'options', options);
+%    svmstruct = svmtrain(training(1:5:length(training),:),classification(1:5:length(classification)), 'options', options);
 end
 
 function test_classify(csvMatrix, svmstruct)
@@ -67,12 +67,12 @@ function test_classify(csvMatrix, svmstruct)
     for i = NUM_OF_STOCKS_FOR_TRAINING:189
         stock_class = svmclassify(svmstruct, csvMatrix(i,TRAINING_DATA_END:-1:NUM_OF_DAYS_TO_FORWARD_DAY + 1));
 
-        ratio = ratio_calculator(csvMatrix(NUM_OF_DAYS_TO_FORWARD_DAY:-1:1));
+        ratio = ratio_calculator(csvMatrix(i,NUM_OF_DAYS_TO_FORWARD_DAY:-1:1));
         if (strcmp(stock_class, 'green') && ratio < 1 || strcmp(stock_class, 'red') && ratio >= 1)
     %        if (abs(ratio - 1) > acceptect_mistake)
                 disp('WRONG: ')
                 i
-                csvMatrix(i,TRAINING_DATA_END - 1)
+                ratio
                 num_of_mistakes = num_of_mistakes + 1;
      %       end
         end
