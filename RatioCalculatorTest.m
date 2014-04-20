@@ -1,7 +1,7 @@
 classdef RatioCalculatorTest < matlab.unittest.TestCase
     methods (Test)
         function test_ratio_calc(testCase)
-            vector_between_last_stock_and_forward_day = [0.01 10 -2];
+            vector_between_last_stock_and_forward_day = [10 -2];
 
             ratio = ratio_calculator(vector_between_last_stock_and_forward_day);
 
