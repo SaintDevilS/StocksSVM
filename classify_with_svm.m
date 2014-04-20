@@ -11,20 +11,24 @@ function declare_global()
     global TRAINING_DATA_START TRAINING_DATA_END NUM_OF_FEATURES NUM_OF_STOCKS_FOR_TRAINING
 
     TRAINING_DATA_START = 719;
-    TRAINING_DATA_END = 30;
+    TRAINING_DATA_END = 38;
     NUM_OF_FEATURES = TRAINING_DATA_START - TRAINING_DATA_END + 1;
     NUM_OF_STOCKS_FOR_TRAINING = 160;
 end
 
+
 function [current_interval_training, classification] = get_training_and_classification(csvMatrix, i, j, num_of_days_in_sample)
     current_interval_training = csvMatrix(i,j:-1:j - num_of_days_in_sample + 1);
-        
-    if csvMatrix(i,j - num_of_days_in_sample) <= 0
-        classification = 'red';         
+    
+    num_of_days_to_forward_day = 8;
+    
+    ratio = ratio_calculator(csvMatrix(i, j - num_of_days_in_sample:-1:j - num_of_days_in_sample - num_of_days_to_forward_day + 1));
+    
+    if ratio < 1
+        classification = 'red';
     else
         classification = 'green';
     end
-
 end
 
 function svmstruct = train_svm(csvMatrix)
@@ -46,9 +50,9 @@ function svmstruct = train_svm(csvMatrix)
         end
     end
     
-    options = statset('MaxIter', 50000);
-    svmstruct = svmtrain(training,classification, 'kernel_function', 'polynomial', 'polyorder', 30, 'options', options);
-%    svmstruct = svmtrain(training,classification, 'options', options);
+%    options = statset('MaxIter', 50000);
+ %   svmstruct = svmtrain(training,classification, 'kernel_function', 'polynomial', 'polyorder', 30, 'options', options);
+    svmstruct = svmtrain(training,classification, 'kernel_function', 'polynomial');
 end
 
 function test_classify(csvMatrix, svmstruct)
