@@ -20,12 +20,12 @@ function declare_global()
 end
 
 
-function [current_interval_training, classification] = get_training_and_classification(csvMatrix, i, j)
+function [current_interval_training, classification] = get_training_and_classification(single_stock, j)
     global NUM_OF_DAYS_TO_FORWARD_DAY NUM_OF_DAYS_IN_SAMPLE
     first_classified_index = j - NUM_OF_DAYS_IN_SAMPLE;
-    current_interval_training = csvMatrix(i,j:-1:first_classified_index + 1);
+    current_interval_training = single_stock(j:-1:first_classified_index + 1);
         
-    ratio = ratio_calculator(csvMatrix(i, first_classified_index:-1:first_classified_index - NUM_OF_DAYS_TO_FORWARD_DAY + 1));
+    ratio = ratio_calculator(single_stock(first_classified_index:-1:first_classified_index - NUM_OF_DAYS_TO_FORWARD_DAY + 1));
     
     if ratio < 1
         classification = 'red';
@@ -47,7 +47,7 @@ function svmstruct = train_svm(csvMatrix)
     index = 1;
     for i = 1:NUM_OF_STOCKS_FOR_TRAINING
         for j = TRAINING_DATA_START:-jump_interval:TRAINING_DATA_END
-            [training(index,:), classification{index, 1}] = get_training_and_classification(csvMatrix, i, j);
+            [training(index,:), classification{index, 1}] = get_training_and_classification(csvMatrix(i,:), j);
             
             index=index + 1;
         end
