@@ -2,8 +2,9 @@ function classify_with_svm()
     csvMatrix = csvread('C:\Weiyun\workspace\StocksSVM\vectors.csv');
     declare_global()
     
-    svmstruct = train_svm(csvMatrix)
+    %train_svm(csvMatrix);
     
+    load('svm_struct.mat', 'svmstruct');
     test_classify(csvMatrix, svmstruct)
 end
 
@@ -55,7 +56,8 @@ function svmstruct = train_svm(csvMatrix)
     
     options = statset('MaxIter', 150000);
     svmstruct = svmtrain(training(1:2:length(training),:),classification(1:2:length(classification)), 'kernel_function', 'polynomial', 'polyorder', 4, 'options', options);
-
+    
+    save('svm_struct.mat', 'svmstruct');
 %    svmstruct = svmtrain(training(1:5:length(training),:),classification(1:5:length(classification)), 'options', options);
 end
 
