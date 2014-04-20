@@ -4,25 +4,28 @@ function classify_with_svm()
     
     svmstruct = train_svm(csvMatrix)
     
-    %test_classify(csvMatrix, svmstruct)
+    test_classify(csvMatrix, svmstruct)
 end
 
 function declare_global()
-    global TRAINING_DATA_START TRAINING_DATA_END NUM_OF_FEATURES NUM_OF_STOCKS_FOR_TRAINING
+    global TRAINING_DATA_START TRAINING_DATA_END NUM_OF_FEATURES NUM_OF_STOCKS_FOR_TRAINING NUM_OF_DAYS_TO_FORWARD_DAY NUM_OF_DAYS_IN_SAMPLE
 
     TRAINING_DATA_START = 719;
-    TRAINING_DATA_END = 38;
+    NUM_OF_DAYS_TO_FORWARD_DAY = 8;
+    NUM_OF_DAYS_IN_SAMPLE = 30;
+
+    TRAINING_DATA_END = NUM_OF_DAYS_TO_FORWARD_DAY + NUM_OF_DAYS_IN_SAMPLE;
     NUM_OF_FEATURES = TRAINING_DATA_START - TRAINING_DATA_END + 1;
     NUM_OF_STOCKS_FOR_TRAINING = 160;
 end
 
 
-function [current_interval_training, classification] = get_training_and_classification(csvMatrix, i, j, num_of_days_in_sample)
-    current_interval_training = csvMatrix(i,j:-1:j - num_of_days_in_sample + 1);
-    
-    num_of_days_to_forward_day = 8;
-    
-    ratio = ratio_calculator(csvMatrix(i, j - num_of_days_in_sample:-1:j - num_of_days_in_sample - num_of_days_to_forward_day + 1));
+function [current_interval_training, classification] = get_training_and_classification(csvMatrix, i, j)
+    global NUM_OF_DAYS_TO_FORWARD_DAY NUM_OF_DAYS_IN_SAMPLE
+    first_classified_index = j - NUM_OF_DAYS_IN_SAMPLE;
+    current_interval_training = csvMatrix(i,j:-1:first_classified_index + 1);
+        
+    ratio = ratio_calculator(csvMatrix(i, first_classified_index:-1:first_classified_index - NUM_OF_DAYS_TO_FORWARD_DAY + 1));
     
     if ratio < 1
         classification = 'red';
@@ -44,32 +47,34 @@ function svmstruct = train_svm(csvMatrix)
     index = 1;
     for i = 1:NUM_OF_STOCKS_FOR_TRAINING
         for j = TRAINING_DATA_START:-jump_interval:TRAINING_DATA_END
-            [training(index,:), classification{index, 1}] = get_training_and_classification(csvMatrix, i, j, num_of_days_in_sample);
+            [training(index,:), classification{index, 1}] = get_training_and_classification(csvMatrix, i, j);
             
             index=index + 1;
         end
     end
     
-%    options = statset('MaxIter', 50000);
+    options = statset('MaxIter', 50000);
  %   svmstruct = svmtrain(training,classification, 'kernel_function', 'polynomial', 'polyorder', 30, 'options', options);
-    svmstruct = svmtrain(training,classification, 'kernel_function', 'polynomial');
+
+    svmstruct = svmtrain(training(1:5:length(training),:),classification(1:5:length(classification)), 'options', options);
 end
 
 function test_classify(csvMatrix, svmstruct)
-    global TRAINING_DATA_START TRAINING_DATA_END NUM_OF_STOCKS_FOR_TRAINING
+    global TRAINING_DATA_END NUM_OF_STOCKS_FOR_TRAINING NUM_OF_DAYS_TO_FORWARD_DAY
     num_of_mistakes = 0;
     acceptect_mistake = 0.1;
     
     for i = NUM_OF_STOCKS_FOR_TRAINING:189
-        stock_class = svmclassify(svmstruct, csvMatrix(i,TRAINING_DATA_START:-1:TRAINING_DATA_END));
+        stock_class = svmclassify(svmstruct, csvMatrix(i,TRAINING_DATA_END:-1:NUM_OF_DAYS_TO_FORWARD_DAY + 1));
 
-        if (strcmp(stock_class, 'green') && csvMatrix(i,TRAINING_DATA_END - 1) <= 0 || strcmp(stock_class, 'red') && csvMatrix(i,TRAINING_DATA_END - 1) > 0)
-            if (abs(csvMatrix(i,TRAINING_DATA_END - 1)) > acceptect_mistake)
+        ratio = ratio_calculator(csvMatrix(NUM_OF_DAYS_TO_FORWARD_DAY:-1:1));
+        if (strcmp(stock_class, 'green') && ratio < 1 || strcmp(stock_class, 'red') && ratio >= 1)
+    %        if (abs(ratio - 1) > acceptect_mistake)
                 disp('WRONG: ')
                 i
                 csvMatrix(i,TRAINING_DATA_END - 1)
                 num_of_mistakes = num_of_mistakes + 1;
-            end
+     %       end
         end
     end
     
