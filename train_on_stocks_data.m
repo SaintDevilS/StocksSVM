@@ -3,7 +3,7 @@ function svmstruct = train_on_stocks_data(csvMatrix)
     
     [training, classification] = get_training_and_classification(csvMatrix);
     
-    options = statset('MaxIter', 150000);
+    options = statset('MaxIter', 2000000);
     svmstruct = svmtrain(training(1:PORTION_OF_DATA:length(training),:),classification(1:PORTION_OF_DATA:length(classification)), 'kernel_function', 'polynomial', 'polyorder', POLY_ORDER, 'options', options);
     
     save(sprintf('svm_struct_portion_%d_order_%d.mat', PORTION_OF_DATA, POLY_ORDER), 'svmstruct');

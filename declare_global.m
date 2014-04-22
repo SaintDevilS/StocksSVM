@@ -10,7 +10,7 @@ function declare_global()
     NUM_OF_FEATURES = TRAINING_DATA_START - TRAINING_DATA_END + 1;
     NUM_OF_STOCKS_FOR_TRAINING = 160;
     
-    PORTION_OF_DATA = 10;
+    PORTION_OF_DATA = 1;
     POLY_ORDER = 4;
 end
 
