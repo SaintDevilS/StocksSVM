@@ -1,13 +1,6 @@
-function get_training_and_classification_of_similarity(csvMatrix, num_of_days_in_sample, num_of_stocks_for_training)
-    for first_stock = 1:num_of_stocks_for_training
-        save_training_data_for_stock(csvMatrix, first_stock, num_of_days_in_sample, num_of_stocks_for_training)
-    end
-end
-
-function save_training_data_for_stock(csvMatrix, first_stock_index, num_of_days_in_sample, num_of_stocks_for_training)
+function [training, classification] = get_training_data_for_stock(csvMatrix, first_stock_index, num_of_days_in_sample, num_of_stocks_for_training, jump_interval)
     global TRAINING_DATA_START TRAINING_DATA_END 
     
-    jump_interval = 7;
     num_of_samples = floor( (num_of_stocks_for_training - 1) * (TRAINING_DATA_START - TRAINING_DATA_END) / jump_interval);
     
     training = zeros(num_of_samples, num_of_days_in_sample * 2);
@@ -19,13 +12,10 @@ function save_training_data_for_stock(csvMatrix, first_stock_index, num_of_days_
             continue
         end
         for j = TRAINING_DATA_START:-jump_interval:TRAINING_DATA_END
-            [training(index,:), classification{index, 1}] = get_training_and_classification_of_stocks(csvMatrix(first_stock_index,:), csvMatrix(second_stock,:), j, jump_interval, num_of_days_in_sample);
+            [training(index,:), classification{index, 1}] = get_training_and_classification_of_stocks(csvMatrix(first_stock_index,:), csvMatrix(second_stock,:), j, 7, num_of_days_in_sample);
             index = index + 1;
         end
     end
-    
-    save(strcat('training_data/training_file', int2str(first_stock_index)), 'training');
-    save(strcat('training_data/classification_file', int2str(first_stock_index)), 'classification');
 end
 
 function [current_training, classification] = get_training_and_classification_of_stocks(first_stock, second_stock, index_of_first_value_in_training,...
