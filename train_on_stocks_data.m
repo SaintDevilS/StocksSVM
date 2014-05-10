@@ -2,7 +2,7 @@ function train_on_stocks_data(training, classification, portion_of_data, poly_or
 
     svmstruct_name = sprintf('svm_struct_portion_%d_order_%d.mat', portion_of_data, poly_order);
     
-    if exist(svmstruct_name, 'file')
+    if exist(strcat(strcat(svmstruct_path, '/'), svmstruct_name), 'file')
         return;
     end
     
