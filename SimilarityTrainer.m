@@ -20,28 +20,28 @@ classdef SimilarityTrainer
         end
         
         function [training, classification] = get_training_and_classification(obj, num_of_stocks_for_training)
-            num_of_samples = floor( (num_of_stocks_for_training - 1) * (obj.training_data_start - obj.training_data_end) / obj.Jump_interval);
+            num_of_samples = floor( num_of_stocks_for_training * (num_of_stocks_for_training - 1) * (obj.training_data_start - obj.training_data_end) / obj.Jump_interval);
 
-            training = zeros(num_of_samples, num_of_days_in_sample * 2);
+            training = zeros(num_of_samples, obj.Num_of_days_in_training * 2);
             classification = cell(num_of_samples ,1);
 
             index = 1;
             for first_stock = 1:num_of_stocks_for_training
                 for second_stock = 1:num_of_stocks_for_training
-                    if first_stock_index == second_stock
+                    if first_stock == second_stock
                         continue
                     end
-                    for j = obj.training_data_start:-jump_interval:obj.training_data_end
-                        [training(index,:), classification{index, 1}] = get_training_and_classification_of_stocks(obj.ItsCsvMatrix(first_stock,:), obj.ItsCsvMatrix(second_stock,:), j, num_of_days_in_sample);
+                    for j = obj.training_data_start:-obj.Jump_interval:obj.training_data_end
+                        [training(index,:), classification{index, 1}] = obj.get_training_and_classification_of_stocks(obj.ItsCsvMatrix(first_stock,:), obj.ItsCsvMatrix(second_stock,:), j);
                         index = index + 1;
                     end
                 end
             end
         end
 
-        function [current_training, classification] = get_training_and_classification_of_stocks(obj, first_stock, second_stock, index_of_first_value_in_training, num_of_days_in_training)
+        function [current_training, classification] = get_training_and_classification_of_stocks(obj, first_stock, second_stock, index_of_first_value_in_training)
 
-            index_of_first_value_in_classification = index_of_first_value_in_training - num_of_days_in_training;
+            index_of_first_value_in_classification = index_of_first_value_in_training - obj.Num_of_days_in_training;
 
             first_stock_training = first_stock(index_of_first_value_in_training:-1:index_of_first_value_in_classification + 1);
             second_stock_training = second_stock(index_of_first_value_in_training:-1:index_of_first_value_in_classification + 1);
