@@ -3,7 +3,7 @@ function [ svmstruct ] = train_on_similarity( num_of_stocks_to_classify )
 %   Detailed explanation goes here
 
     num_of_samples_in_stock = 15582;
-    whole_training = zeros(num_of_stoxcks_to_classify * num_of_samples_in_stock, 60);
+    whole_training = zeros(num_of_stocks_to_classify * num_of_samples_in_stock, 60);
     whole_classification = cell(num_of_stocks_to_classify * num_of_samples_in_stock, 1);
     
     training = zeros(num_of_samples_in_stock, 60);
