@@ -7,7 +7,7 @@ classdef SimilarityTrainer
         Num_of_days_in_training
         Num_of_days_in_classification
         Jump_interval = 30;
-        training_data_start = 719;
+        training_data_start = 780;
         training_data_end
     end
     
@@ -47,13 +47,39 @@ classdef SimilarityTrainer
 
             ratio_first = ratio_calculator(first_stock(index_of_first_value_in_classification:-1:index_of_first_value_in_classification - obj.Num_of_days_in_classification + 1));
             ratio_second = ratio_calculator(second_stock(index_of_first_value_in_classification:-1:index_of_first_value_in_classification - obj.Num_of_days_in_classification + 1));
-
+            
+            
             if (ratio_first < 1 && ratio_second < 1) || (ratio_first > 1 && ratio_second > 1)  
                 classification = 'green';
             else
                 classification = 'red';
             end
-        end 
+            
+%            fprintf('ratio of first=%f and second=%f and their classification=%s\n', ratio_first, ratio_second, classification);
+        end
+        
+        function test_similarity_classify(obj, path, index_of_first_stock_under_test)
+            load(path, 'svmstruct');
+            num_of_mistakes = 0;
+            
+            for first_stock = index_of_first_stock_under_test:111
+                for second_stock = first_stock+1:111
+                    [data, classification] = obj.get_training_and_classification_of_stocks(obj.ItsCsvMatrix(first_stock,:), obj.ItsCsvMatrix(second_stock,:), obj.training_data_end - 1);
+                    
+                    classifier_answer = svmclassify(svmstruct, data);
+
+                    if (~strcmp(classification, classifier_answer))
+%                        fprintf('WRONG for: %d %d\n', first_stock, second_stock);
+                        num_of_mistakes = num_of_mistakes + 1;
+
+                    end
+                end
+            end
+            num_of_times_classified=(111 - index_of_first_stock_under_test) * (111 - index_of_first_stock_under_test - 1);
+            fprintf('num of mistakes=%d out of %d which is %f percent wrong\n',num_of_mistakes, num_of_times_classified, num_of_mistakes / num_of_times_classified * 100);
+
+        end
+
         
     end
 end

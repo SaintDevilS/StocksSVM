@@ -1,14 +1,16 @@
-function train_on_stocks_data(training, classification, portion_of_data, poly_order, svmstruct_path)
+function path = train_on_stocks_data(training, classification, portion_of_data, poly_order, svmstruct_path)
 
-    svmstruct_name = sprintf('svm_struct_portion_%d_order_%d.mat', portion_of_data, poly_order);
+    svmstruct_name = sprintf('svm_struct_portion_%d_order_%s.mat', portion_of_data, poly_order);
+    path = strcat(strcat(svmstruct_path, '/'), svmstruct_name);
     
-    if exist(strcat(strcat(svmstruct_path, '/'), svmstruct_name), 'file')
+    if exist(path, 'file')
         return;
     end
-    
+   
     options = statset('MaxIter', 4000000);
-    svmstruct = svmtrain(training(1:portion_of_data:length(training),:),classification(1:portion_of_data:length(classification)),...
-                         'options', options);
     
-    save(strcat(strcat(svmstruct_path, '/'), svmstruct_name), 'svmstruct');
+    svmstruct = svmtrain(training(1:portion_of_data:length(training),:),classification(1:portion_of_data:length(classification)),...
+                         'kernelcachelimit', 15000,'options',options, 'kernel_function', 'polynomial', 'polyorder', 4);
+    
+    save(path, 'svmstruct');
 end
