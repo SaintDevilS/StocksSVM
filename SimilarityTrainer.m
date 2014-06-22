@@ -58,8 +58,7 @@ classdef SimilarityTrainer
 %            fprintf('ratio of first=%f and second=%f and their classification=%s\n', ratio_first, ratio_second, classification);
         end
         
-        function test_similarity_classify(obj, path, index_of_first_stock_under_test)
-            load(path, 'svmstruct');
+        function test_similarity_classify(obj, svmstruct, index_of_first_stock_under_test)
             num_of_mistakes = 0;
             
             for first_stock = index_of_first_stock_under_test:111
